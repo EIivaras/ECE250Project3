@@ -1,0 +1,8 @@
+﻿  test.cpp
+c:\users\toddw_000\source\repos\ece250project3\ece250project3\ece250.h(505): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\toddw_000\source\repos\ece250project3\ece250project3\ece250.h(505): warning C5043: 'operator new': exception specification does not match previous declaration
+  c:\users\toddw_000\source\repos\ece250project3\ece250project3\predefined c++ types (compiler internal)(33): note: see declaration of 'operator new'
+c:\users\toddw_000\source\repos\ece250project3\ece250project3\ece250.h(544): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\toddw_000\source\repos\ece250project3\ece250project3\ece250.h(544): warning C5043: 'operator new[]': exception specification does not match previous declaration
+  c:\users\toddw_000\source\repos\ece250project3\ece250project3\predefined c++ types (compiler internal)(58): note: see declaration of 'operator new[]'
+  ECE250Project3.vcxproj -> C:\Users\toddw_000\source\repos\ECE250Project3\Debug\ECE250Project3.exe

@@ -368,12 +368,12 @@ bool Search_tree<Type>::Node::insert(Type const &obj, Node *&to_this) {
 
 template <typename Type>
 bool Search_tree<Type>::Node::erase(Type const &obj, Node *&to_this) {
-	if (obj < node_value) {
-		if (left_tree == nullptr) {
-			return false;
+	if (obj < node_value) { // If the value of the object is less than the value of the current node
+		if (left_tree == nullptr) { // But we're already at the smallest node
+			return false; // Return false
 		}
 		else {
-			if (left_tree->erase(obj, left_tree)) {
+			if (left_tree->erase(obj, left_tree)) { // If we're not already at the smallest node, we'll keep looking
 				update_height();
 				return true;
 			}
@@ -381,12 +381,12 @@ bool Search_tree<Type>::Node::erase(Type const &obj, Node *&to_this) {
 			return false;
 		}
 	}
-	else if (obj > node_value) {
-		if (right_tree == nullptr) {
-			return false;
+	else if (obj > node_value) { // If the value of the object is greater than the value of the current node
+		if (right_tree == nullptr) { // But we're already at the largest node
+			return false; // Return false
 		}
 		else {
-			if (right_tree->erase(obj, right_tree)) {
+			if (right_tree->erase(obj, right_tree)) { // If we're not already at the largest node, we'll keep looking
 				update_height();
 				return true;
 			}
@@ -394,25 +394,33 @@ bool Search_tree<Type>::Node::erase(Type const &obj, Node *&to_this) {
 			return false;
 		}
 	}
-	else {
-		assert(obj == node_value);
+	else { // If the value being tested is not less than the current value or greater than the current value
+		assert(obj == node_value); // To be absolutely sure, will terminate function call if evaluates false
 
-		if (is_leaf()) {
+		// For the iterator
+		// Update the two nodes that point to the node that's about to be erased, and make them point to each other instead
+		this->previous_node->next_node = this->next_node;
+		this->next_node->previous_node = this->previous_node;
+
+		if (is_leaf()) { // If the node is a leaf node, we're fine
 			to_this = nullptr;
 			delete this;
 		}
-		else if (left_tree == nullptr) {
-			to_this = right_tree;
-			delete this;
+		else if (left_tree == nullptr) { // If the node's left tree is null (so it's a 2-part linked list)
+			to_this = right_tree; // We can just make the current node the right_tree (reduces height of sub-tree)
+			delete this; // Deletes current node
 		}
-		else if (right_tree == nullptr) {
-			to_this = left_tree;
-			delete this;
+		else if (right_tree == nullptr) { // If the node's right tree is null (so it's a 2-part linked list)
+			to_this = left_tree; // We can just make the current node the left_tree (reduces height of sub-tree)
+			delete this; // Deletes current node
 		}
-		else {
-			node_value = right_tree->front()->node_value;
-			right_tree->erase(node_value, right_tree);
-			update_height();
+		else { // Otherwise, we're in the middle of the tree. We have work to do.
+			node_value = right_tree->front()->node_value; // Replaces the value of the node we wanted to erase with the value of the node at 
+			                                              // the front of the right tree
+			                                              // This means that everything in the right tree will still be greater than the node
+			                                              // whose value we just replaced
+			right_tree->erase(node_value, right_tree); // Erase the node at the front of the tree whose vaue we just replicated
+			update_height(); // And update the height
 		}
 
 		return true;

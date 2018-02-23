@@ -461,6 +461,7 @@ void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
 			new_root->right_tree = this; // Make the current unbalanced node the right tree of the new root
 			to_this = new_root; // The pointer TO THIS (this being the unbalanced node) must now point to the new root
 			this->left_tree = new_root_right_tree; // Make the old right tree of the new root the left tree of the old root
+
 			new_root->update_height(); // Update the height of the new root
 			this->update_height(); // Update the height of the old root
 		}
@@ -478,6 +479,11 @@ void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
 			old_root_left_tree->right_tree = new_root_left_tree; // right_tree of the old root's left_tree is the new root's old left_tree
 			this->left_tree = new_root_right_tree; // left_tree of the old root is the new root's old right_tree
 			to_this = new_root; // Update the pointer to the unbalanced node to point to the new root
+
+			//Update heights of all the moved nodes
+			new_root->update_height();
+			new_root_left_tree->update_height();
+			new_root_right_tree->update_height();
 		}
 	}
 	else { // Otherwise, it's a right insertion
@@ -502,6 +508,11 @@ void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
 			old_root_right_tree->left_tree = new_root_right_tree;
 			this->right_tree = new_root_left_tree;
 			to_this = new_root;
+
+			//Update heights of all the moved nodes
+			new_root->update_height();
+			new_root_right_tree->update_height();
+			new_root_left_tree->update_height();
 		}
 	}
 	return;

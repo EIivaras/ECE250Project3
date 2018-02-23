@@ -46,7 +46,7 @@ private:
 		Node *find(Type const &obj);
 
 		void clear();
-		void rebalance(Node *&to_this);
+		void rebalance(Type const &obj, Node *&to_this);
 		bool insert(Type const &obj, Node *&to_this);
 		bool erase(Type const &obj, Node *&to_this);
 	};
@@ -338,9 +338,8 @@ bool Search_tree<Type>::Node::insert(Type const &obj, Node *&to_this) {
 				// If this check passes, the current node (to_this) is unbalanced
 				// By its recursive implementation, we'll always get the lowest node in the tree that's inbalanced recognized first
 				if ((right_tree == nullptr) || (left_tree->height() - right_tree->height() == 2)) {
-					rebalance(to_this);
-				}
-				//update_height();
+					rebalance(obj, to_this); // Where to_this is the pointer to the unbalanced node
+				};
 				return true;
 			}
 			else { // TODO: Could not be inserted - perhaps a duplicate?
@@ -406,20 +405,30 @@ bool Search_tree<Type>::Node::erase(Type const &obj, Node *&to_this) {
 	else { // If the value being tested is not less than the current value or greater than the current value
 		assert(obj == node_value); // To be absolutely sure, will terminate function call if evaluates false
 
-		// For the iterator
-		// Update the two nodes that point to the node that's about to be erased, and make them point to each other instead
-		this->previous_node->next_node = this->next_node;
-		this->next_node->previous_node = this->previous_node;
-
 		if (is_leaf()) { // If the node is a leaf node, we're fine
+			// For the iterator
+			// Update the two nodes that point to the node that's about to be erased, and make them point to each other instead
+			this->previous_node->next_node = this->next_node;
+			this->next_node->previous_node = this->previous_node;
+
 			to_this = nullptr;
 			delete this;
 		}
 		else if (left_tree == nullptr) { // If the node's left tree is null (so it's a 2-part linked list)
+			// For the iterator
+			// Update the two nodes that point to the node that's about to be erased, and make them point to each other instead
+			this->previous_node->next_node = this->next_node;
+			this->next_node->previous_node = this->previous_node;
+
 			to_this = right_tree; // We can just make the current node the right_tree (reduces height of sub-tree)
 			delete this; // Deletes current node
 		}
 		else if (right_tree == nullptr) { // If the node's right tree is null (so it's a 2-part linked list)
+			// For the iterator
+			// Update the two nodes that point to the node that's about to be erased, and make them point to each other instead
+			this->previous_node->next_node = this->next_node;
+			this->next_node->previous_node = this->previous_node;
+
 			to_this = left_tree; // We can just make the current node the left_tree (reduces height of sub-tree)
 			delete this; // Deletes current node
 		}
@@ -437,7 +446,34 @@ bool Search_tree<Type>::Node::erase(Type const &obj, Node *&to_this) {
 }
 
 template <typename Type>
-void Search_tree<Type>::Node::rebalance(Node *&to_this) {
+void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
+	// Now to check for a left-left, left-right, right-right, or right-left imbalance and act accordingly
+	// If the current node's is less than the unbalanced node's value, it must be a left insertion
+	if (obj < this->node_value) {
+		if (obj < this->left_tree->node_value) { // If less than the value of the left_tree of the unbalanced node, it's a left-left imbalance
+			// We're going to rotate the unbalanced node to be the right_tree of its left_tree
+			// Below: Our reference to the left_tree of the unbalanced node, which we are going to promote to the unbalanced node's position
+			Search_tree<Type>::Node * unbalanced_left_tree = this->left_tree;
+			// Our reference to the right_tree of what is to become the new root, which will become the left_tree of the unbalanced node after it is moved
+			Search_tree<Type>::Node * unbalanced_left_tree_right_tree = unbalanced_left_tree->right_tree;
+			unbalanced_left_tree->right_tree = this; // Make the current unbalanced node the right tree of the new root
+			to_this = unbalanced_left_tree; // The pointer TO THIS (this being the unbalanced node) must now point to the new root
+			this->left_tree = unbalanced_left_tree_right_tree; // Make the old right tree of the new root the left tree of the old root
+			unbalanced_left_tree->update_height(); // Update the height of the new root
+			this->update_height(); // Update the height of the old root
+		}
+		else { // Otherwise, it's a left-right imbalance
+
+		}
+	}
+	else { // Otherwise, it's a right insertion
+		if (obj > to_this->right_tree->node_value) { // If greater than the value of the right_tree of the unbalanced node, it's a right-right imbalance
+
+		}
+		else { // Otherwise, it's a right-left imbalance
+
+		}
+	}
 	return;
 }
 

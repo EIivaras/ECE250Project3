@@ -32,7 +32,7 @@ int main() {
 
 	std::cout << "Now to erase nodes with values on the interval of [14, 21] inside the tree!" << std::endl;
 
-	for (int i = 14; i <= 21; ++i) {
+	for (int i = 14; i < 22; ++i) {
 		std::cout << tree.erase(i);
 	}
 

@@ -361,7 +361,9 @@ bool Search_tree<Type>::Node::insert(Type const &obj, Node *&to_this) {
 		}
 		else {
 			if (right_tree->insert(obj, right_tree)) {
-				update_height();
+				if ((left_tree == nullptr) || (left_tree->height() - right_tree->height() == 2)) {
+					rebalance(obj, to_this); // Where to_this is the pointer to the unbalanced node
+				};
 				return true;
 			}
 			else {
@@ -453,25 +455,53 @@ void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
 		if (obj < this->left_tree->node_value) { // If less than the value of the left_tree of the unbalanced node, it's a left-left imbalance
 			// We're going to rotate the unbalanced node to be the right_tree of its left_tree
 			// Below: Our reference to the left_tree of the unbalanced node, which we are going to promote to the unbalanced node's position
-			Search_tree<Type>::Node * unbalanced_left_tree = this->left_tree;
+			Search_tree<Type>::Node * new_root = this->left_tree;
 			// Our reference to the right_tree of what is to become the new root, which will become the left_tree of the unbalanced node after it is moved
-			Search_tree<Type>::Node * unbalanced_left_tree_right_tree = unbalanced_left_tree->right_tree;
-			unbalanced_left_tree->right_tree = this; // Make the current unbalanced node the right tree of the new root
-			to_this = unbalanced_left_tree; // The pointer TO THIS (this being the unbalanced node) must now point to the new root
-			this->left_tree = unbalanced_left_tree_right_tree; // Make the old right tree of the new root the left tree of the old root
-			unbalanced_left_tree->update_height(); // Update the height of the new root
+			Search_tree<Type>::Node * new_root_right_tree = new_root->right_tree;
+			new_root->right_tree = this; // Make the current unbalanced node the right tree of the new root
+			to_this = new_root; // The pointer TO THIS (this being the unbalanced node) must now point to the new root
+			this->left_tree = new_root_right_tree; // Make the old right tree of the new root the left tree of the old root
+			new_root->update_height(); // Update the height of the new root
 			this->update_height(); // Update the height of the old root
 		}
 		else { // Otherwise, it's a left-right imbalance
-
+			// Here, we are going to promote the right_tree of the unbalanced node's left_tree to be the new root, as it is greater than everything in the unbalanced node's left_tree
+			// Then, we're going to take the left_tree of the new root and make it the right_tree of the old root's left_tree
+			// And we're going to take the right_tree of the new root and make it the left_tree of the old root's right_tree
+			Search_tree<Type>::Node * new_root = this->left_tree->right_tree;
+			Search_tree<Type>::Node * old_root_left_tree = this->left_tree;
+			Search_tree<Type>::Node * new_root_left_tree = new_root->left_tree;
+			Search_tree<Type>::Node * new_root_right_tree = new_root->right_tree;
+			// Now we begin reassigning
+			new_root->left_tree = old_root_left_tree; // New root's left_tree is the old root's right_tree
+			new_root->right_tree = this; // New root's right_tree is the old root
+			old_root_left_tree->right_tree = new_root_left_tree; // right_tree of the old root's left_tree is the new root's old left_tree
+			this->left_tree = new_root_right_tree; // left_tree of the old root is the new root's old right_tree
+			to_this = new_root; // Update the pointer to the unbalanced node to point to the new root
 		}
 	}
 	else { // Otherwise, it's a right insertion
 		if (obj > to_this->right_tree->node_value) { // If greater than the value of the right_tree of the unbalanced node, it's a right-right imbalance
-
+			// Same thing as above, but replace left_tree with right_tree and vice versa
+			Search_tree<Type>::Node * new_root = this->right_tree;
+			Search_tree<Type>::Node * new_root_left_tree = new_root->left_tree;
+			new_root->left_tree = this;
+			to_this = new_root;
+			this->right_tree = new_root_left_tree;
+			new_root->update_height();
+			this->update_height();
 		}
 		else { // Otherwise, it's a right-left imbalance
-
+			// Same thing as above, but replace left_tree with right_tree and vice versa
+			Search_tree<Type>::Node * new_root = this->right_tree->left_tree;
+			Search_tree<Type>::Node * old_root_right_tree = this->right_tree;
+			Search_tree<Type>::Node * new_root_right_tree = new_root->right_tree;
+			Search_tree<Type>::Node * new_root_left_tree = new_root->left_tree;
+			new_root->right_tree = old_root_right_tree;
+			new_root->left_tree = this;
+			old_root_right_tree->left_tree = new_root_right_tree;
+			this->right_tree = new_root_left_tree;
+			to_this = new_root;
 		}
 	}
 	return;

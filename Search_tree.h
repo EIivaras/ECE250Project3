@@ -49,6 +49,8 @@ private:
 		void rebalance(Type const &obj, Node *&to_this);
 		bool insert(Type const &obj, Node *&to_this);
 		bool erase(Type const &obj, Node *&to_this);
+
+		void print(std::ostream &out, int tabs = 0);
 	};
 
 	Node *root_node;
@@ -340,6 +342,7 @@ bool Search_tree<Type>::Node::insert(Type const &obj, Node *&to_this) {
 				if ((right_tree == nullptr) || (left_tree->height() - right_tree->height() == 2)) {
 					rebalance(obj, to_this); // Where to_this is the pointer to the unbalanced node
 				};
+				update_height();
 				return true;
 			}
 			else { // TODO: Could not be inserted - perhaps a duplicate?
@@ -361,9 +364,10 @@ bool Search_tree<Type>::Node::insert(Type const &obj, Node *&to_this) {
 		}
 		else {
 			if (right_tree->insert(obj, right_tree)) {
-				if ((left_tree == nullptr) || (left_tree->height() - right_tree->height() == 2)) {
+				if ((left_tree == nullptr) || (right_tree->height() - left_tree->height() == 2)) {
 					rebalance(obj, to_this); // Where to_this is the pointer to the unbalanced node
 				};
+				update_height();
 				return true;
 			}
 			else {
@@ -462,8 +466,8 @@ void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
 			to_this = new_root; // The pointer TO THIS (this being the unbalanced node) must now point to the new root
 			this->left_tree = new_root_right_tree; // Make the old right tree of the new root the left tree of the old root
 
-			new_root->update_height(); // Update the height of the new root
 			this->update_height(); // Update the height of the old root
+			new_root->update_height(); // Update the height of the new root
 		}
 		else { // Otherwise, it's a left-right imbalance
 			// Here, we are going to promote the right_tree of the unbalanced node's left_tree to be the new root, as it is greater than everything in the unbalanced node's left_tree
@@ -476,14 +480,14 @@ void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
 			// Now we begin reassigning
 			new_root->left_tree = old_root_left_tree; // New root's left_tree is the old root's right_tree
 			new_root->right_tree = this; // New root's right_tree is the old root
+			to_this = new_root; // Update the pointer to the unbalanced node to point to the new root
 			old_root_left_tree->right_tree = new_root_left_tree; // right_tree of the old root's left_tree is the new root's old left_tree
 			this->left_tree = new_root_right_tree; // left_tree of the old root is the new root's old right_tree
-			to_this = new_root; // Update the pointer to the unbalanced node to point to the new root
 
 			//Update heights of all the moved nodes
+			old_root_left_tree->update_height();
+			this->update_height();
 			new_root->update_height();
-			new_root_left_tree->update_height();
-			new_root_right_tree->update_height();
 		}
 	}
 	else { // Otherwise, it's a right insertion
@@ -494,8 +498,9 @@ void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
 			new_root->left_tree = this;
 			to_this = new_root;
 			this->right_tree = new_root_left_tree;
-			new_root->update_height();
+
 			this->update_height();
+			new_root->update_height();
 		}
 		else { // Otherwise, it's a right-left imbalance
 			// Same thing as above, but replace left_tree with right_tree and vice versa
@@ -505,17 +510,35 @@ void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
 			Search_tree<Type>::Node * new_root_left_tree = new_root->left_tree;
 			new_root->right_tree = old_root_right_tree;
 			new_root->left_tree = this;
+			to_this = new_root;
 			old_root_right_tree->left_tree = new_root_right_tree;
 			this->right_tree = new_root_left_tree;
-			to_this = new_root;
 
 			//Update heights of all the moved nodes
+			old_root_right_tree->update_height();
+			this->update_height();
 			new_root->update_height();
-			new_root_right_tree->update_height();
-			new_root_left_tree->update_height();
 		}
 	}
 	return;
+}
+
+template <typename Type>
+void Search_tree<Type>::Node::print(std::ostream &out, int tabs) {
+	for (int i = 0; i < tabs; i++) {
+		out << " ";
+	}
+	out << (tabs ? "`==" : "");
+	if (this == nullptr) {
+		out << "xx";
+		out << " h=-1" << std::endl;
+	}
+	else {
+		out << node_value;
+		out << " h=" << height() << std::endl;
+		left_tree->print(out, tabs + 1);
+		right_tree->print(out, tabs + 1);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -582,12 +605,11 @@ bool Search_tree<Type>::Iterator::operator!=(typename Search_tree<Type>::Iterato
 //                            Friends                               //
 //////////////////////////////////////////////////////////////////////
 
-// You can modify this function however you want:  it will not be tested
+// You can modify this function however you want: it will not be tested
 
 template <typename T>
 std::ostream &operator<<(std::ostream &out, Search_tree<T> const &list) {
-	out << "not yet implemented";
-
+	list.root_node->print(out);
 	return out;
 }
 

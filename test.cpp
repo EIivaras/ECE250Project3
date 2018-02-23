@@ -7,7 +7,30 @@ int main() {
 	// For testing iterator
 
 	for (int i = 1; i <= 30; ++i) {
-		std::cout << tree.insert((83 * i) % 30);
+		/* if (i == 1) {
+			tree.insert(23);
+		}
+		if (i == 2) {
+			tree.insert(16);
+		}
+		if (i == 3) {
+			tree.insert(9);
+		}
+		if (i == 4) {
+			tree.insert(2);
+		}
+		if (i == 5) {
+			tree.insert(10);
+		}
+		if (i == 6) {
+			tree.insert(12);
+		}
+		if (i == 7) {
+			tree.erase(2);
+			tree.insert(11);
+		} */
+		std::cout << tree.insert((83 * i) % 30) << std::endl;
+		std::cout << tree;
 	}
 
 	std::cout << std::endl;

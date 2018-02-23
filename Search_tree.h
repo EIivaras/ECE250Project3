@@ -46,6 +46,7 @@ private:
 		Node *find(Type const &obj);
 
 		void clear();
+		void rebalance(Node *&to_this);
 		bool insert(Type const &obj, Node *&to_this);
 		bool erase(Type const &obj, Node *&to_this);
 	};
@@ -331,7 +332,15 @@ bool Search_tree<Type>::Node::insert(Type const &obj, Node *&to_this) {
 		}
 		else {
 			if (left_tree->insert(obj, left_tree)) { // Otherwise, recursively call insert until we get to the right spot in the tree
-				update_height();
+				// If we're inserting into the left tree (which we know is not null by our if above) and the right tree is null, 
+				// we know we'll have a height imbalance of 2
+				// Otherwise, we just check heights of left and right sub-trees
+				// If this check passes, the current node (to_this) is unbalanced
+				// By its recursive implementation, we'll always get the lowest node in the tree that's inbalanced recognized first
+				if ((right_tree == nullptr) || (left_tree->height() - right_tree->height() == 2)) {
+					rebalance(to_this);
+				}
+				//update_height();
 				return true;
 			}
 			else { // TODO: Could not be inserted - perhaps a duplicate?
@@ -425,6 +434,11 @@ bool Search_tree<Type>::Node::erase(Type const &obj, Node *&to_this) {
 
 		return true;
 	}
+}
+
+template <typename Type>
+void Search_tree<Type>::Node::rebalance(Node *&to_this) {
+	return;
 }
 
 //////////////////////////////////////////////////////////////////////

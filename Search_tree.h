@@ -339,7 +339,7 @@ bool Search_tree<Type>::Node::insert(Type const &obj, Node *&to_this) {
 				// Otherwise, we just check heights of left and right sub-trees
 				// If this check passes, the current node (to_this) is unbalanced
 				// By its recursive implementation, we'll always get the lowest node in the tree that's inbalanced recognized first
-				if ((right_tree == nullptr) || (left_tree->height() - right_tree->height() == 2)) {
+				if ((right_tree == nullptr) || (abs(left_tree->height() - right_tree->height()) >= 2)) {
 					rebalance(to_this); // Where to_this is the pointer to the unbalanced node
 				};
 				update_height();
@@ -364,7 +364,7 @@ bool Search_tree<Type>::Node::insert(Type const &obj, Node *&to_this) {
 		}
 		else {
 			if (right_tree->insert(obj, right_tree)) {
-				if ((left_tree == nullptr) || (right_tree->height() - left_tree->height() == 2)) {
+				if ((left_tree == nullptr) || (abs(right_tree->height() - left_tree->height()) >= 2)) {
 					rebalance(to_this); // Where to_this is the pointer to the unbalanced node
 				};
 				update_height();
@@ -388,6 +388,9 @@ bool Search_tree<Type>::Node::erase(Type const &obj, Node *&to_this) {
 		}
 		else {
 			if (left_tree->erase(obj, left_tree)) { // If we're not already at the smallest node, we'll keep looking
+				if (std::abs(left_tree->height() - right_tree->height()) >= 2) {
+					rebalance(to_this); // Where to_this is the pointer to the unbalanced node
+				};
 				update_height();
 				return true;
 			}
@@ -401,6 +404,9 @@ bool Search_tree<Type>::Node::erase(Type const &obj, Node *&to_this) {
 		}
 		else {
 			if (right_tree->erase(obj, right_tree)) { // If we're not already at the largest node, we'll keep looking
+				if (std::abs(left_tree->height() - right_tree->height()) == 2) {
+					rebalance(to_this); // Where to_this is the pointer to the unbalanced node
+				};
 				update_height();
 				return true;
 			}

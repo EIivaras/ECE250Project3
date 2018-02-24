@@ -46,7 +46,7 @@ private:
 		Node *find(Type const &obj);
 
 		void clear();
-		void rebalance(Type const &obj, Node *&to_this);
+		void rebalance(Node *&to_this);
 		bool insert(Type const &obj, Node *&to_this);
 		bool erase(Type const &obj, Node *&to_this);
 
@@ -340,7 +340,7 @@ bool Search_tree<Type>::Node::insert(Type const &obj, Node *&to_this) {
 				// If this check passes, the current node (to_this) is unbalanced
 				// By its recursive implementation, we'll always get the lowest node in the tree that's inbalanced recognized first
 				if ((right_tree == nullptr) || (left_tree->height() - right_tree->height() == 2)) {
-					rebalance(obj, to_this); // Where to_this is the pointer to the unbalanced node
+					rebalance(to_this); // Where to_this is the pointer to the unbalanced node
 				};
 				update_height();
 				return true;
@@ -365,7 +365,7 @@ bool Search_tree<Type>::Node::insert(Type const &obj, Node *&to_this) {
 		else {
 			if (right_tree->insert(obj, right_tree)) {
 				if ((left_tree == nullptr) || (right_tree->height() - left_tree->height() == 2)) {
-					rebalance(obj, to_this); // Where to_this is the pointer to the unbalanced node
+					rebalance(to_this); // Where to_this is the pointer to the unbalanced node
 				};
 				update_height();
 				return true;
@@ -452,11 +452,11 @@ bool Search_tree<Type>::Node::erase(Type const &obj, Node *&to_this) {
 }
 
 template <typename Type>
-void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
+void Search_tree<Type>::Node::rebalance(Node *&to_this) {
 	// Now to check for a left-left, left-right, right-right, or right-left imbalance and act accordingly
-	// If the current node's is less than the unbalanced node's value, it must be a left insertion
-	if (obj < this->node_value) {
-		if (obj < this->left_tree->node_value) { // If less than the value of the left_tree of the unbalanced node, it's a left-left imbalance
+	// If the left_tree's height is greater than the right_tree's height, we know it's a left imbalance
+	if (this->left_tree->height() > this->right_tree->height()) {
+		if (this->left_tree->left_tree->height() > this->left_tree->right_tree->height()) { // If the left_tree's left_tree's height is less than its right_tree's height, it's a left-left imbalance
 			// We're going to rotate the unbalanced node to be the right_tree of its left_tree
 			// Below: Our reference to the left_tree of the unbalanced node, which we are going to promote to the unbalanced node's position
 			Search_tree<Type>::Node * new_root = this->left_tree;
@@ -490,8 +490,8 @@ void Search_tree<Type>::Node::rebalance(Type const &obj, Node *&to_this) {
 			new_root->update_height();
 		}
 	}
-	else { // Otherwise, it's a right insertion
-		if (obj > to_this->right_tree->node_value) { // If greater than the value of the right_tree of the unbalanced node, it's a right-right imbalance
+	else { // Otherwise, it's a right imbalance
+		if (this->right_tree->right_tree->height() > this->right_tree->left_tree->height()) { // If greater than the value of the right_tree of the unbalanced node, it's a right-right imbalance
 			// Same thing as above, but replace left_tree with right_tree and vice versa
 			Search_tree<Type>::Node * new_root = this->right_tree;
 			Search_tree<Type>::Node * new_root_left_tree = new_root->left_tree;
